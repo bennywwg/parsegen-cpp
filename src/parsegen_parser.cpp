@@ -146,11 +146,11 @@ void parser::handle_reduce_exception(std::istream& stream, std::exception const&
   ss << "While trying to reduce symbols {";
   auto& prod = at(grammar->productions, production);
   for (int i = 0; i < isize(prod.rhs); ++i) {
-    auto& rhs_name = at(grammar->symbol_names, at(prod.rhs, i));
+    auto rhs_name = denormalize_name(at(grammar->symbol_names, at(prod.rhs, i)));
     if (i > 0) ss << ", ";
     ss << rhs_name;
   }
-  auto& lhs_name = at(grammar->symbol_names, prod.lhs);
+  auto lhs_name = denormalize_name(at(grammar->symbol_names, prod.lhs));
   ss << "} to symbol " << lhs_name << ".\n";
   print_parser_stack(stream, ss);
   throw parse_error(ss.str());
@@ -161,7 +161,7 @@ void parser::handle_shift_exception(std::istream& stream, std::exception const& 
   std::stringstream ss;
   ss << "parsegen::parser caught an exception in the shift() virtual member method:\n";
   ss << e.what() << '\n';
-  ss << "While trying to shift this " << at(grammar->symbol_names, lexer_token) << " symbol:\n";
+  ss << "While trying to shift this " << denormalize_name(at(grammar->symbol_names, lexer_token)) << " symbol:\n";
   get_underlined_portion(stream, stream_ends_stack.back(), last_lexer_accept_position, ss);
   print_parser_stack(stream, ss);
   throw parse_error(ss.str());

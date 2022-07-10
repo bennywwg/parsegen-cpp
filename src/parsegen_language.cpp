@@ -40,7 +40,7 @@ grammar_ptr build_grammar(language const& language) {
     for (auto& lang_symb : lang_prod.rhs) {
       if (!symbol_map.count(lang_symb)) {
         std::stringstream ss;
-        ss << "RHS entry \"" << lang_symb
+        ss << "RHS entry \"" << language.denormalize_name(lang_symb)
            << "\" is neither a nonterminal (LHS of a production) nor a "
               "token!\n";
         throw parse_error(ss.str());

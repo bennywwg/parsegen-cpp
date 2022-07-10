@@ -23,6 +23,8 @@ struct language {
     std::vector<std::string> rhs;
   };
   std::vector<production> productions;
+
+  inline virtual std::string denormalize_name(std::string const& normalized) const { return normalized; }
 };
 
 using language_ptr = std::shared_ptr<language>;

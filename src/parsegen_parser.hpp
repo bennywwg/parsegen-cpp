@@ -64,6 +64,9 @@ class parser {
   // in indentation
   std::vector<indent_stack_entry> indent_stack;
 
+ public:
+  inline virtual std::string denormalize_name(std::string const& normalized) const { return normalized; }
+
  private:  // helper methods
   void at_token(std::istream& stream);
   void at_token_indent(std::istream& stream);
