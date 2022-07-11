@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 
 namespace parsegen {
 
@@ -21,6 +22,11 @@ struct grammar {
   int nterminals;
   production_vector productions;
   std::vector<std::string> symbol_names;
+  std::map<std::string, std::string> denormalize_map;
+  std::map<int, std::string> production_names;
+
+  inline std::string denormalize_name(std::string const& normalized) const { return denormalize_map.at(normalized); }
+  inline std::string production_name(int prod) const { return production_names.at(prod); }
 };
 
 using grammar_ptr = std::shared_ptr<grammar const>;

@@ -975,16 +975,16 @@ std::string from_automaton(finite_automaton const& fa)
       int weight = 0;
       auto& ii_ref = *L[i][i];
       if (typeid(ii_ref) != typeid(regex_null)) {
-        weight += ii_ref.print().length() * (in * out - 1);
+        weight += static_cast<int>(ii_ref.print().length()) * (in * out - 1);
       }
       for (int j = 0; j < (nstates + 1); ++j) {
         auto& ij_ref = *L[i][j];
         auto& ji_ref = *L[j][i];
         if (typeid(ij_ref) != typeid(regex_null)) {
-          weight += ij_ref.print().length() * (in - 1);
+          weight += static_cast<int>(ij_ref.print().length()) * (in - 1);
         }
         if (typeid(ji_ref) != typeid(regex_null)) {
-          weight += ji_ref.print().length() * (out - 1);
+          weight += static_cast<int>(ji_ref.print().length()) * (out - 1);
         }
       }
       if (min_weight_state == -1 || weight < min_weight) {

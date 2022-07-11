@@ -55,6 +55,8 @@ grammar_ptr build_grammar(language const& language) {
   }
   add_end_terminal(out);
   add_accept_production(out);
+  out.denormalize_map = language.denormalize_map;
+  out.production_names = language.production_names;
   return std::make_shared<grammar>(std::move(out));
 }
 
