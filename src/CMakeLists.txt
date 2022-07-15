@@ -32,7 +32,7 @@ add_library(parsegen
   parsegen_xml.cpp
   parsegen_yaml.cpp
   parsegen_error.cpp
-  )
+   "frontend.cpp")
 
 target_compile_features(parsegen PUBLIC cxx_std_17)
 set_target_properties(parsegen PROPERTIES
@@ -44,7 +44,7 @@ target_include_directories(parsegen
 
 add_executable(parsegen-calc
   parsegen_calc.cpp
-  )
+   "frontend.cpp")
 
 target_compile_features(parsegen-calc PUBLIC cxx_std_17)
 
