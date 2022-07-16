@@ -92,11 +92,11 @@ namespace parsegen {
 
             const std::string lhs = GetType(DemangleName<R>());
 
-            productionCallbacks[static_cast<int>(productions.size())] = [this, func](std::vector<std::any>& anys) -> std::any {
+            productionCallbacks.push_back([this, func](std::vector<std::any>& anys) -> std::any {
                 tuple<Args...> args;
                 PackAnys<sizeof...(Args), Args...>(args, anys);
                 return call(func, args);
-            };
+            });
 
             productions.push_back({ lhs, rhs });
         }
@@ -108,9 +108,9 @@ namespace parsegen {
         inline void AddToken_Internal(std::function<R(std::string&)> const& func, std::string const& regex) {
             const std::string lhs = GetType(DemangleName<R>());
 
-            tokenCallbacks[static_cast<int>(tokens.size())] = [this, func](std::string& val) -> std::any {
+            tokenCallbacks.push_back([this, func](std::string& val) -> std::any {
                 return func(val);
-            };
+            });
 
             tokens.push_back({ lhs, regex });
         }
