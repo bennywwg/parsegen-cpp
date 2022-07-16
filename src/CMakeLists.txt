@@ -15,6 +15,7 @@ set(PARSEGEN_HEADERS
   parsegen_object_pointer.hpp
   parsegen_string.hpp
   parsegen.hpp
+  frontend.hpp
   )
 
 add_library(parsegen
@@ -32,7 +33,7 @@ add_library(parsegen
   parsegen_xml.cpp
   parsegen_yaml.cpp
   parsegen_error.cpp
-   "frontend.cpp")
+  frontend.cpp)
 
 target_compile_features(parsegen PUBLIC cxx_std_17)
 set_target_properties(parsegen PROPERTIES
