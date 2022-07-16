@@ -13,13 +13,13 @@ namespace parsegen {
     }
 
     std::string frontend::GetType(std::string name) {
-        if (normalize_name.find(name) == normalize_name.end()) {
+        if (normalize_production_name.find(name) == normalize_production_name.end()) {
             ++nextID;
-            normalize_name[name] = ToAlpha(nextID);
-            denormalize_production_name[normalize_name[name]] = name;
+            normalize_production_name[name] = ToAlpha(nextID);
+            denormalize_production_name[normalize_production_name[name]] = name;
         }
 
-        return normalize_name[name];
+        return normalize_production_name[name];
     }
     
     std::string demangle(const char* mangled) {

@@ -32,7 +32,7 @@ namespace parsegen {
     private:
         bool HasInitializedRules = false;
     public:
-        std::map<std::string, std::string>                              normalize_name; // std::map from typeid name to normalized name suitable for parsegen
+        std::map<std::string, std::string>                              normalize_production_name; // std::map from typeid name to normalized name suitable for parsegen
         std::map<std::string, std::string>                              denormalize_production_name; // reverse of the above map
         std::vector<std::function<std::any(std::vector<std::any>&)>>    productionCallbacks;
         std::vector<std::function<std::any(std::string&)>>              tokenCallbacks;
@@ -143,25 +143,35 @@ namespace parsegen {
     };
 
     // T is the final type the parser will produce
-    template<typename T>
+    template<typename ReturnType, typename LangType>
     class Parser {
     private:
         std::shared_ptr<ParserImpl> PImpl;
     public:
-        inline T Parse(std::string const& text) {
+        inline ReturnType Parse(std::string const& text) {
             std::any res = PImpl->parse_string(text, "input");
             try {
-                return std::any_cast<T>(res);
-            } catch (std::bad_any_cast const& ex) {
+                return std::any_cast<ReturnType>(res);
+            } catch (std::bad_any_cast const&) {
                 throw std::runtime_error("parse_string completed but the return type was incorrect");
             }
         }
 
-        template<typename L, typename ...Args>
-        Parser(Args&&... args)
-        requires std::derived_from<frontend, L>
+        Parser()
+        requires std::derived_from<LangType, frontend>
         {
-            std::shared_ptr<L> lang = std::make_shared<L>(std::forward<Args>(args)...);
+            std::shared_ptr<frontend> lang = std::make_shared<LangType>();
+
+            lang->InitRules();
+
+            PImpl = std::make_shared<ParserImpl>(lang);
+        }
+
+        template<typename ...Args>
+        Parser(Args&&... args)
+        requires std::derived_from<LangType, frontend> && (sizeof...(Args) > 0)
+        {
+            std::shared_ptr<frontend> lang = std::make_shared<LangType>(std::forward<Args>(args)...);
 
             lang->InitRules();
 
@@ -170,4 +180,4 @@ namespace parsegen {
     };
 }
 
-#define Rule denormalize_token_names[static_cast<int>(productions.size())] = (__FILE__ + std::string(":") + std::to_string(__LINE__)), RuleF
+#define Rule denormalize_production_names[static_cast<int>(productions.size())] = (__FILE__ + std::string(":") + std::to_string(__LINE__)), RuleF
