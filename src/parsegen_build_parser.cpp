@@ -433,7 +433,7 @@ void print_dot(std::string const& filepath, parser_in_progress const& pip) {
           }
         }
         if (!found) {
-          std::cerr << "BUG: missing reduce action in state " << grammar->production_name(s_i)
+          std::cerr << "BUG: missing reduce action in state " << grammar->denormalize_production_name(s_i)
                     << " !!!\n";
           abort();
         }
@@ -995,18 +995,18 @@ static std::vector<bool> determine_adequate_states(
               std::swap(ap1, ap2);
             }
             assert(ap1->action.kind == action::kind::reduce);
-            std::cerr << "shift-reduce conflict in state " << grammar->production_name(s_i) << ":\n";
+            std::cerr << "shift-reduce conflict in state " << grammar->denormalize_production_name(s_i) << ":\n";
             std::cerr << "reduce ";
             auto& prod = at(grammar->productions, ap1->action.production);
             auto& lhs_name = at(grammar->symbol_names, prod.lhs);
-            std::cerr << grammar->denormalize_name(lhs_name)  << " ::=";
+            std::cerr << grammar->denormalize_token_name(lhs_name)  << " ::=";
             for (auto rhs_symb : prod.rhs) {
               auto& rhs_symb_name = at(grammar->symbol_names, rhs_symb);
-              std::cerr << " " << grammar->denormalize_name(rhs_symb_name);
+              std::cerr << " " << grammar->denormalize_token_name(rhs_symb_name);
             }
             auto shift_symb = *(ap2->context.begin());
             auto shift_name = at(grammar->symbol_names, shift_symb);
-            std::cerr << "\nshift " << grammar->denormalize_name(shift_name) << '\n';
+            std::cerr << "\nshift " << grammar->denormalize_token_name(shift_name) << '\n';
           }
           state_is_adequate = false;
           break;

@@ -117,7 +117,7 @@ void parser::handle_unacceptable_token(std::istream& stream)
   ss << "Starting at column " << column << " of line " << line << " of " << stream_name << ",\n";
   ss << "parsegen::parser found an unacceptable token (one for which the parser can take no shift or reduce action):\n";
   get_underlined_portion(stream, stream_ends_stack.back(), last_lexer_accept_position, ss);
-  ss << "This unacceptable token is called " << grammar->denormalize_name(at(grammar->symbol_names, lexer_token)) << " in the language.\n";
+  ss << "This unacceptable token is called " << grammar->denormalize_token_name(at(grammar->symbol_names, lexer_token)) << " in the language.\n";
   std::set<std::string> expect_names;
   for (int expect_token = 0; expect_token < grammar->nterminals;
       ++expect_token) {
@@ -133,7 +133,7 @@ void parser::handle_unacceptable_token(std::istream& stream)
     if (*it == ",")
       ss << "','";
     else
-      ss << grammar->denormalize_name(*it);
+      ss << grammar->denormalize_token_name(*it);
   }
   ss << "}\n";
   print_parser_stack(stream, ss);
@@ -148,11 +148,11 @@ void parser::handle_reduce_exception(std::istream& stream, std::exception const&
   ss << "While trying to reduce symbols {";
   auto& prod = at(grammar->productions, production);
   for (int i = 0; i < isize(prod.rhs); ++i) {
-    auto rhs_name = grammar->denormalize_name(at(grammar->symbol_names, at(prod.rhs, i)));
+    auto rhs_name = grammar->denormalize_token_name(at(grammar->symbol_names, at(prod.rhs, i)));
     if (i > 0) ss << ", ";
     ss << rhs_name;
   }
-  auto lhs_name = grammar->denormalize_name(at(grammar->symbol_names, prod.lhs));
+  auto lhs_name = grammar->denormalize_token_name(at(grammar->symbol_names, prod.lhs));
   ss << "} to symbol " << lhs_name << ".\n";
   print_parser_stack(stream, ss);
   throw parse_error(ss.str());
@@ -163,7 +163,7 @@ void parser::handle_shift_exception(std::istream& stream, std::exception const& 
   std::stringstream ss;
   ss << "parsegen::parser caught an exception in the shift() virtual member method:\n";
   ss << e.what() << '\n';
-  ss << "While trying to shift this " << grammar->denormalize_name(at(grammar->symbol_names, lexer_token)) << " symbol:\n";
+  ss << "While trying to shift this " << grammar->denormalize_token_name(at(grammar->symbol_names, lexer_token)) << " symbol:\n";
   get_underlined_portion(stream, stream_ends_stack.back(), last_lexer_accept_position, ss);
   print_parser_stack(stream, ss);
   throw parse_error(ss.str());
@@ -301,7 +301,7 @@ void parser::print_parser_stack(std::istream& stream, std::ostream& output)
 {
   output << "The parser stack contains:\n";
   for (int i = 0; i < isize(symbol_stack); ++i) {
-    output << grammar->denormalize_name(at(grammar->symbol_names, at(symbol_stack, i))) << ":\n";
+    output << grammar->denormalize_token_name(at(grammar->symbol_names, at(symbol_stack, i))) << ":\n";
     if (i + 1 >= isize(stream_ends_stack)) {
       throw std::logic_error("i + 1 >= isize(stream_ends_stack)!");
     }

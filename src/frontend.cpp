@@ -1,44 +1,25 @@
 #include "frontend.hpp"
 
 namespace parsegen {
-    class Parser : public parsegen::parser {
-    public:
-        std::any Parse(std::string const& text) {
-            return parse_string(text, "input");
-            /*try {
-                return std::any_cast<Program>(res);
-            }
-            catch (std::bad_any_cast const& ex) {
-                throw std::runtime_error("parse_string completed but the return type was incorrect");
-            }*/
-        }
+    ParserImpl::ParserImpl(std::shared_ptr<frontend> l)
+    : parser(build_parser_tables(*l)), lang(l) { }
 
-        Parser(std::shared_ptr<frontend> l) : parser(l->tables), lang(l) { }
-        virtual ~Parser() = default;
+    std::any ParserImpl::shift(int token, std::string& text) {
+        return lang->tokenCallbacks[token](text);
+    }
 
-    protected:
-        std::shared_ptr<frontend> lang;
-
-        virtual std::any shift(int token, std::string& text) override {
-            auto it = lang->tokenCallbacks.find(token);
-            if (it != lang->tokenCallbacks.end()) return it->second(text);
-            throw std::runtime_error("Internal error, token that should exist wasn't found");
-        }
-        virtual std::any reduce(int prod, std::vector<std::any>& rhs) override {
-            auto it = lang->productionCallbacks.find(prod);
-            if (it != lang->productionCallbacks.end()) return it->second(rhs);
-            throw std::runtime_error("Internal error, rule that should exist wasn't found");
-        }
-    };
+    std::any ParserImpl::reduce(int prod, std::vector<std::any>& rhs) {
+        return lang->productionCallbacks[prod](rhs);
+    }
 
     std::string frontend::GetType(std::string name) {
-        if (norm.find(name) == norm.end()) {
+        if (normalize_name.find(name) == normalize_name.end()) {
             ++nextID;
-            norm[name] = ToAlpha(nextID);
-            denormalize_map[norm[name]] = name;
+            normalize_name[name] = ToAlpha(nextID);
+            denormalize_production_name[normalize_name[name]] = name;
         }
 
-        return norm[name];
+        return normalize_name[name];
     }
     
     std::string demangle(const char* mangled) {

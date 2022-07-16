@@ -6,6 +6,7 @@
 #include <map>
 #include <variant>
 #include <tuple>
+#include <concepts>
 
 #ifdef __unix__
 #include <cxxabi.h>
@@ -27,14 +28,15 @@ namespace parsegen {
 
     std::string ToAlpha(int value);
 
-    struct frontend : public parsegen::language {
+    class frontend : public language {
+    private:
+        bool HasInitializedRules = false;
     public:
-        parsegen::parser_tables_ptr tables;
-
-        std::map<std::string, std::string> norm; // std::map from typeid name to normalized name suitable for parsegen
-        std::map<int, std::function<std::any(std::vector<std::any>&)>> productionCallbacks;
-        std::map<int, std::function<std::any(std::string&)>> tokenCallbacks;
-        uint32_t nextID = 0;
+        std::map<std::string, std::string>                              normalize_name; // std::map from typeid name to normalized name suitable for parsegen
+        std::map<std::string, std::string>                              denormalize_production_name; // reverse of the above map
+        std::vector<std::function<std::any(std::vector<std::any>&)>>    productionCallbacks;
+        std::vector<std::function<std::any(std::string&)>>              tokenCallbacks;
+        uint32_t                                                        nextID = 0;
 
         std::string GetType(std::string name);
 
@@ -126,6 +128,46 @@ namespace parsegen {
 
         virtual void InitRules() = 0;
     };
+
+
+    class ParserImpl : public parsegen::parser {
+    public:
+        ParserImpl(std::shared_ptr<frontend> l);
+        virtual ~ParserImpl() = default;
+
+    protected:
+        std::shared_ptr<frontend> lang;
+
+        virtual std::any shift(int token, std::string& text) override;
+        virtual std::any reduce(int prod, std::vector<std::any>& rhs) override;
+    };
+
+    // T is the final type the parser will produce
+    template<typename T>
+    class Parser {
+    private:
+        std::shared_ptr<ParserImpl> PImpl;
+    public:
+        inline T Parse(std::string const& text) {
+            std::any res = PImpl->parse_string(text, "input");
+            try {
+                return std::any_cast<T>(res);
+            } catch (std::bad_any_cast const& ex) {
+                throw std::runtime_error("parse_string completed but the return type was incorrect");
+            }
+        }
+
+        template<typename L, typename ...Args>
+        Parser(Args&&... args)
+        requires std::derived_from<frontend, L>
+        {
+            std::shared_ptr<L> lang = std::make_shared<L>(std::forward<Args>(args)...);
+
+            lang->InitRules();
+
+            ParserImpl = std::make_shared<ParserImpl>(lang);
+        }
+    };
 }
 
-#define Rule production_names[static_cast<int>(productions.size())] = (__FILE__ + std::string(":") + std::to_string(__LINE__)), RuleF
+#define Rule denormalize_token_names[static_cast<int>(productions.size())] = (__FILE__ + std::string(":") + std::to_string(__LINE__)), RuleF
