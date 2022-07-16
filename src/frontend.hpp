@@ -143,15 +143,15 @@ namespace parsegen {
     };
 
     // T is the final type the parser will produce
-    template<typename ReturnType, typename LangType>
+    template<typename LangType>
     class Parser {
     private:
         std::shared_ptr<ParserImpl> PImpl;
     public:
-        inline ReturnType Parse(std::string const& text) {
+        inline typename LangType::ReturnType Parse(std::string const& text) {
             std::any res = PImpl->parse_string(text, "input");
             try {
-                return std::any_cast<ReturnType>(res);
+                return std::any_cast<typename LangType::ReturnType>(res);
             } catch (std::bad_any_cast const&) {
                 throw std::runtime_error("parse_string completed but the return type was incorrect");
             }
