@@ -28,7 +28,7 @@ namespace parsegen {
     }
 
     std::string ToAlpha(int value) {
-        std::string res = to_string(value);
+        std::string res = std::to_string(value);
         for (size_t i = 0; i < res.size(); ++i) {
             res[i] += ('a' - '0');
         }

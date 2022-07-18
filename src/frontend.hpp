@@ -15,7 +15,19 @@
 #include <parsegen.hpp>
 
 namespace parsegen {
-    using namespace std;
+    template <class...>
+    using void_t = void;
+
+    template <class, class T, class... Args>
+    struct is_aggregate_initializable_ : std::false_type {};
+
+    template <class T, class... Args>
+    struct is_aggregate_initializable_<
+        void_t<decltype(T{std::declval<Args>()...})>,
+    T, Args...> : std::true_type {};
+
+    template <class T, class... Args>
+    using is_aggregate_initializable = is_aggregate_initializable_<void_t<>, T, Args...>;
 
     std::string demangle(const char* mangled);
 
@@ -49,17 +61,17 @@ namespace parsegen {
 
         template<int Index, typename ...Args>
         typename std::enable_if<Index == 0, void>::type
-        inline PackAnys(tuple<Args...>&, std::vector<std::any>&) const { }
+        inline PackAnys(std::tuple<Args...>&, std::vector<std::any>&) const { }
 
         template<int Index, typename ...Args>
         typename std::enable_if<Index == 1, void>::type
-        inline PackAnys(tuple<Args...>& args, std::vector<std::any>& anys) const {
+        inline PackAnys(std::tuple<Args...>& args, std::vector<std::any>& anys) const {
             std::get<0>(args) = std::any_cast<decltype(std::get<0>(args))>(anys[0]);
         }
 
         template<int Index, typename ...Args>
         typename std::enable_if<(Index > 1), void>::type
-        inline PackAnys(tuple<Args...>& args, std::vector<std::any>& anys) const {
+        inline PackAnys(std::tuple<Args...>& args, std::vector<std::any>& anys) const {
             PackAnys<Index - 1, Args...>(args, anys);
             std::get<Index - 1>(args) = std::any_cast<decltype(std::get<Index - 1>(args))>(anys[Index - 1]);
         }
@@ -89,7 +101,7 @@ namespace parsegen {
             const std::string lhs = DemangleName<R>();
 
             productionCallbacks.push_back([this, func](std::vector<std::any>& anys) -> std::any {
-                tuple<Args...> args;
+                std::tuple<Args...> args;
                 PackAnys<sizeof...(Args), Args...>(args, anys);
                 return call(func, args);
             });
@@ -115,11 +127,11 @@ namespace parsegen {
         inline void Token(F lambda, std::string const& regex) { AddToken_Internal(std::function(lambda), regex); }
 
         template<typename T>
-        typename std::enable_if<!std::is_constructible<T, std::string&>::value, void>::type
+        typename std::enable_if<!is_aggregate_initializable<T, std::string&>::value, void>::type
         inline Token(std::string const& regex) { AddToken_Internal(std::function([](std::string&) { return T{ }; }), regex); }
 
         template<typename T>
-        typename std::enable_if<std::is_constructible<T, std::string&>::value, void>::type
+        typename std::enable_if<is_aggregate_initializable<T, std::string&>::value, void>::type
         inline Token(std::string const& regex) { AddToken_Internal(std::function([](std::string& text) { return T{ text }; }), regex); }
 
         virtual void InitRules() = 0;
@@ -171,7 +183,7 @@ namespace parsegen {
 
             lang->InitRules();
 
-            ParserImpl = std::make_shared<ParserImpl>(lang);
+            PImpl = std::make_shared<ParserImpl>(lang);
         }
     };
 }
