@@ -11,16 +11,6 @@ namespace parsegen {
     std::any ParserImpl::reduce(int prod, std::vector<std::any>& rhs) {
         return lang->productionCallbacks[prod](rhs);
     }
-
-    std::string frontend::GetType(std::string name) {
-        if (normalize_production_name.find(name) == normalize_production_name.end()) {
-            ++nextID;
-            normalize_production_name[name] = ToAlpha(nextID);
-            denormalize_production_name[normalize_production_name[name]] = name;
-        }
-
-        return normalize_production_name[name];
-    }
     
     std::string demangle(const char* mangled) {
 #ifdef __unix__

@@ -6,12 +6,14 @@
 #include <vector>
 #include <map>
 
+#include "frontend_info.hpp"
+
 namespace parsegen {
 
 /* convention: symbols are numbered with all
    terminal symbols first, all non-terminal symbols after */
 
-struct grammar {
+struct grammar : frontend_info {
   using right_hand_side = std::vector<int>;
   struct production {
     int lhs;
@@ -22,11 +24,6 @@ struct grammar {
   int nterminals;
   production_vector productions;
   std::vector<std::string> symbol_names;
-  std::map<std::string, std::string> denormalize_token_names;
-  std::map<int, std::string> denormalize_production_names;
-
-  inline std::string denormalize_token_name(std::string const& normalized) const { return denormalize_token_names.at(normalized); }
-  inline std::string denormalize_production_name(int prod) const { return denormalize_production_names.at(prod); }
 };
 
 using grammar_ptr = std::shared_ptr<grammar const>;

@@ -9,10 +9,11 @@
 #include "parsegen_finite_automaton.hpp"
 #include "parsegen_grammar.hpp"
 #include "parsegen_parser_tables.hpp"
+#include "frontend_info.hpp"
 
 namespace parsegen {
 
-struct language {
+struct language : public frontend_info {
   struct token {
     std::string name;
     std::string regex;
@@ -23,11 +24,6 @@ struct language {
     std::vector<std::string> rhs;
   };
   std::vector<production> productions;
-  std::map<std::string, std::string> denormalize_token_names;
-  std::map<int, std::string> denormalize_production_names;
-
-  inline std::string denormalize_token_name(std::string const& normalized) const { return denormalize_token_names.at(normalized); }
-  inline std::string denormalize_production_name(int prod) const { return denormalize_production_names.at(prod); }
 };
 
 using language_ptr = std::shared_ptr<language>;

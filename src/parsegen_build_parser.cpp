@@ -433,8 +433,7 @@ void print_dot(std::string const& filepath, parser_in_progress const& pip) {
           }
         }
         if (!found) {
-          std::cerr << "BUG: missing reduce action in state " << grammar->denormalize_production_name(s_i)
-                    << " !!!\n";
+          std::cerr << "BUG: missing reduce action from rule at " << grammar->get_debug_info(s_i) << "\n";
           abort();
         }
         file << "\\}";
@@ -995,7 +994,7 @@ static std::vector<bool> determine_adequate_states(
               std::swap(ap1, ap2);
             }
             assert(ap1->action.kind == action::kind::reduce);
-            std::cerr << "shift-reduce conflict in state " << grammar->denormalize_production_name(s_i) << ":\n";
+            std::cerr << "shift-reduce conflict from rule at " << grammar->get_debug_info(s_i) << "\n";
             std::cerr << "reduce ";
             auto& prod = at(grammar->productions, ap1->action.production);
             auto& lhs_name = at(grammar->symbol_names, prod.lhs);
@@ -1006,7 +1005,7 @@ static std::vector<bool> determine_adequate_states(
             }
             auto shift_symb = *(ap2->context.begin());
             auto shift_name = at(grammar->symbol_names, shift_symb);
-            std::cerr << "\nshift " << grammar->denormalize_token_name(shift_name) << '\n';
+            std::cerr << "\nshift " << grammar->denormalize_token_name(shift_name) << "\n\n";
           }
           state_is_adequate = false;
           break;
@@ -1099,7 +1098,7 @@ parser_in_progress build_lalr1_parser(grammar_ptr grammar, bool verbose) {
     std::cerr << "ERROR: The grammar is not LALR(1).\n";
     determine_adequate_states(states, grammar, true);
     print_dot("error.dot", out);
-    abort();
+    throw std::runtime_error("Couldn't build parser");
   }
   if (verbose) std::cerr << "The grammar is LALR(1)!\n";
   if (verbose) print_dot("lalr1.dot", out);

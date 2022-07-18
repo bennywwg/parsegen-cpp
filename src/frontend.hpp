@@ -32,13 +32,9 @@ namespace parsegen {
     private:
         bool HasInitializedRules = false;
     public:
-        std::map<std::string, std::string>                              normalize_production_name; // std::map from typeid name to normalized name suitable for parsegen
-        std::map<std::string, std::string>                              denormalize_production_name; // reverse of the above map
         std::vector<std::function<std::any(std::vector<std::any>&)>>    productionCallbacks;
         std::vector<std::function<std::any(std::string&)>>              tokenCallbacks;
         uint32_t                                                        nextID = 0;
-
-        std::string GetType(std::string name);
 
         template<typename Function, typename Tuple, size_t ... I>
         auto call(Function f, Tuple t, std::index_sequence<I ...>) const {
@@ -75,14 +71,14 @@ namespace parsegen {
         template<typename R, typename ...Args>
         typename std::enable_if<sizeof...(Args) == 0, void>::type
         inline RegTypes(std::vector<std::string>& res) {
-            res.back() = GetType(DemangleName<R>());
+            res.back() = DemangleName<R>();
         }
 
         template<typename R, typename ...Args>
         typename std::enable_if<sizeof...(Args) != 0, void>::type
         inline RegTypes(std::vector<std::string>& res) {
             RegTypes<Args...>(res);
-            res[res.size() - sizeof...(Args) - 1] = GetType(DemangleName<R>());
+            res[res.size() - sizeof...(Args) - 1] = DemangleName<R>();
         }
 
         template<typename R, typename ...Args>
@@ -90,7 +86,7 @@ namespace parsegen {
             std::vector<std::string> rhs; rhs.resize(sizeof...(Args));
             RegTypes<Args...>(rhs);
 
-            const std::string lhs = GetType(DemangleName<R>());
+            const std::string lhs = DemangleName<R>();
 
             productionCallbacks.push_back([this, func](std::vector<std::any>& anys) -> std::any {
                 tuple<Args...> args;
@@ -106,7 +102,7 @@ namespace parsegen {
 
         template<typename R, typename ...Args>
         inline void AddToken_Internal(std::function<R(std::string&)> const& func, std::string const& regex) {
-            const std::string lhs = GetType(DemangleName<R>());
+            const std::string lhs = DemangleName<R>();
 
             tokenCallbacks.push_back([this, func](std::string& val) -> std::any {
                 return func(val);
@@ -180,4 +176,4 @@ namespace parsegen {
     };
 }
 
-#define Rule denormalize_production_names[static_cast<int>(productions.size())] = (__FILE__ + std::string(":") + std::to_string(__LINE__)), RuleF
+#define Rule production_debug_info[static_cast<int>(productions.size())] = (__FILE__ + std::string(":") + std::to_string(__LINE__)), RuleF
