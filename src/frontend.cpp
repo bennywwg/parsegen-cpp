@@ -1,5 +1,9 @@
 #include "frontend.hpp"
 
+#if defined(__unix__) || defined(__APPLE__)
+#include <cxxabi.h>
+#endif
+
 namespace parsegen {
     ParserImpl::ParserImpl(std::shared_ptr<frontend> l)
     : parser(build_parser_tables(*l)), lang(l) { }
@@ -13,7 +17,7 @@ namespace parsegen {
     }
     
     std::string demangle(const char* mangled) {
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
         int status;
         std::unique_ptr<char[], void (*)(void*)> result(
             abi::__cxa_demangle(mangled, 0, 0, &status), std::free);

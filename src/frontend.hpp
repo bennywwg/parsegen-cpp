@@ -8,10 +8,6 @@
 #include <tuple>
 #include <concepts>
 
-#ifdef __unix__
-#include <cxxabi.h>
-#endif
-
 #include <parsegen.hpp>
 
 namespace parsegen {
