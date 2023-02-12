@@ -6,8 +6,8 @@
 
 namespace parsegen {
 
-parser_graph make_graph_with_nnodes(int nnodes) {
-  return parser_graph(std::size_t(nnodes));
+parser_graph make_graph_with_nnodes(size_t nnodes) {
+  return parser_graph(nnodes);
 }
 
 int get_nnodes(parser_graph const& g) { return isize(g); }

@@ -43,8 +43,8 @@ inline void reserve(std::vector<T>& v, int n) {
 }
 
 template <typename T>
-inline std::vector<T> make_vector(int n, T const& init_val = T()) {
-  return std::vector<T>(std::size_t(n), init_val);
+inline std::vector<T> make_vector(size_t n, T const& init_val = T()) {
+  return std::vector<T>(n, init_val);
 }
 
 }  // namespace parsegen

@@ -9,7 +9,7 @@ namespace parsegen {
 using node_edges = std::vector<int>;
 using parser_graph = std::vector<node_edges>;
 
-parser_graph make_graph_with_nnodes(int nnodes);
+parser_graph make_graph_with_nnodes(size_t nnodes);
 int get_nnodes(parser_graph const& g);
 void add_edge(parser_graph& g, int i, int j);
 node_edges const& get_edges(parser_graph const& g, int i);
